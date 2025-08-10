@@ -109,7 +109,7 @@ export class ChatService {
     // Get or create conversation
     if (isNewConversation) {
       const baseMessage = this.createSystemMessage(organization);
-      conversation = await ConversationService.createConversation(conversationId, baseMessage);
+      conversation = await ConversationService.createConversation(conversationId, String(organization._id), baseMessage);
     } else {
       const existingConversation = await ConversationService.getConversation(conversationId);
       if (!existingConversation) {

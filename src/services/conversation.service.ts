@@ -10,6 +10,7 @@ export interface Message {
 
 export interface Conversation {
   conversationId: string;
+  organizationId: string;
   messages: Message[];
   createdAt: number;
   updatedAt: number;
@@ -36,9 +37,10 @@ export class ConversationService {
     return JSON.parse(data) as Conversation;
   }
 
-  static async createConversation(conversationId: string,baseMessage:string): Promise<Conversation> {
+  static async createConversation(conversationId: string, organizationId: string, baseMessage: string): Promise<Conversation> {
     const conversation: Conversation = {
       conversationId,
+      organizationId,
       messages: [],
       createdAt: Date.now(),
       updatedAt: Date.now()

@@ -88,4 +88,12 @@ export class OrganizationService {
   static async getOrganizationByDomain(domain: string): Promise<IOrganization | null> {
     return await Organization.findOne({ domain });
   }
+
+  static async getOrganizationByName(name: string): Promise<IOrganization | null> {
+    return await Organization.findOne({ name });
+  }
+
+  static async getOrganizationById(id: string): Promise<IOrganization | null> {
+    return await Organization.findById(id);
+  }
 }
