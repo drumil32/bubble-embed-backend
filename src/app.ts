@@ -9,7 +9,7 @@ export const createApp = () => {
   const app = express();
 
   // Trust proxy for nginx
-  app.set('trust proxy', '192.168.1.101'); // TODO: test this on production after changing ip
+  app.set('trust proxy', 'loopback'); // TODO: test this on production after changing ip
 
   // Middleware
   app.use(helmet());
