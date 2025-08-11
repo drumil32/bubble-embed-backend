@@ -52,11 +52,10 @@ const ConversationHistorySchema = new mongoose_1.Schema({
         type: String,
         required: true
     },
-    domain: {
-        type: String,
-        required: true,
-        index: true
-    },
+    domains: [{
+            type: String,
+            required: true
+        }],
     messages: [{
             role: {
                 type: String,
@@ -117,6 +116,6 @@ const ConversationHistorySchema = new mongoose_1.Schema({
 });
 // Indexes for efficient querying
 ConversationHistorySchema.index({ organizationId: 1, createdAt: -1 });
-ConversationHistorySchema.index({ domain: 1, createdAt: -1 });
+ConversationHistorySchema.index({ domains: 1, createdAt: -1 });
 ConversationHistorySchema.index({ startedAt: -1 });
 exports.ConversationHistory = mongoose_1.default.model('ConversationHistory', ConversationHistorySchema);

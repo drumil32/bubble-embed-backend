@@ -42,13 +42,12 @@ const OrganizationSchema = new mongoose_1.Schema({
         unique: true,
         trim: true
     },
-    domain: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        lowercase: true
-    },
+    domains: [{
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true
+        }],
     aiProviderLink: {
         type: String,
         required: true,

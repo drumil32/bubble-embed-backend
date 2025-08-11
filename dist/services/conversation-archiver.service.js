@@ -29,7 +29,7 @@ class ConversationArchiverService {
                 conversationId: conversationData.conversationId,
                 organizationId: organization._id,
                 organizationName: organization.name,
-                domain: organization.domain,
+                domains: organization.domains,
                 messages: conversationData.messages,
                 startedAt: new Date(conversationData.createdAt),
                 endedAt: new Date(conversationData.updatedAt),

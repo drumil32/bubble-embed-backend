@@ -67,19 +67,20 @@ class OrganizationService {
         throw Boom.internal('Unable to generate unique access key after multiple attempts');
     }
     static async createOrganization(data) {
-        // Check if organization with same name or domain already exists
+        // Check if organization with same name or any of the domains already exists
         const existingOrg = await Organization_1.Organization.findOne({
             $or: [
                 { name: data.name },
-                { domain: data.domain }
+                { domains: { $in: data.domains } }
             ]
         });
         if (existingOrg) {
             if (existingOrg.name === data.name) {
                 throw Boom.conflict('Organization with this name already exists');
             }
-            if (existingOrg.domain === data.domain) {
-                throw Boom.conflict('Organization with this domain already exists');
+            const conflictingDomain = data.domains.find(domain => existingOrg.domains.includes(domain));
+            if (conflictingDomain) {
+                throw Boom.conflict(`Organization with domain '${conflictingDomain}' already exists`);
             }
         }
         // Generate unique access key
@@ -93,13 +94,13 @@ class OrganizationService {
         logger_1.logger.info('Organization created successfully', {
             organizationId: organization._id,
             name: organization.name,
-            domain: organization.domain,
+            domains: organization.domains,
             accessKey: organization.accessKey
         });
         return organization;
     }
     static async getOrganizationByDomain(domain) {
-        return await Organization_1.Organization.findOne({ domain });
+        return await Organization_1.Organization.findOne({ domains: { $in: [domain] } });
     }
     static async getOrganizationByName(name) {
         return await Organization_1.Organization.findOne({ name });

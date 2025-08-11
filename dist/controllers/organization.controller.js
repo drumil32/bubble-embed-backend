@@ -39,10 +39,18 @@ const organization_service_1 = require("../services/organization.service");
 const logger_1 = require("../config/logger");
 const registerOrganization = async (req, res, next) => {
     const { requestId } = req;
-    const { name, aiProviderLink, modelName, apiKey, organizationSummary } = req.body;
+    const { name, aiProviderLink, modelName, apiKey, organizationSummary, domains } = req.body;
     // Validate required fields
-    if (!name || !aiProviderLink || !modelName || !apiKey || !organizationSummary) {
-        return next(Boom.badRequest('Missing required fields: name, aiProviderLink, modelName, apiKey, organizationSummary'));
+    if (!name || !aiProviderLink || !modelName || !apiKey || !organizationSummary || !domains) {
+        return next(Boom.badRequest('Missing required fields: name, aiProviderLink, modelName, apiKey, organizationSummary, domains'));
+    }
+    // Validate domains is array and not empty
+    if (!Array.isArray(domains) || domains.length === 0) {
+        return next(Boom.badRequest('Domains must be a non-empty array of strings'));
+    }
+    // Validate all domains are strings
+    if (!domains.every(domain => typeof domain === 'string' && domain.trim())) {
+        return next(Boom.badRequest('All domains must be non-empty strings'));
     }
     let organizationInformation;
     // Check if organizationInformation is provided as file or text
@@ -62,14 +70,9 @@ const registerOrganization = async (req, res, next) => {
     else {
         return next(Boom.badRequest('Organization information is required (either as text or PDF file)'));
     }
-    // Use domain from request if not provided in body
-    const orgDomain = req.body.domain;
-    if (!orgDomain) {
-        return next(Boom.badRequest('Domain is required'));
-    }
     const organizationData = {
         name,
-        domain: orgDomain,
+        domains: domains.map((domain) => domain.trim().toLowerCase()),
         aiProviderLink,
         modelName,
         apiKey,
@@ -80,7 +83,7 @@ const registerOrganization = async (req, res, next) => {
     logger_1.logger.info('Organization registration successful', {
         requestId,
         organizationId: organization._id,
-        domain: organization.domain
+        domains: organization.domains
     });
     res.status(201).json({
         success: true,
@@ -88,7 +91,7 @@ const registerOrganization = async (req, res, next) => {
         data: {
             id: organization._id,
             name: organization.name,
-            domain: organization.domain,
+            domains: organization.domains,
             accessKey: organization.accessKey,
             createdAt: organization.createdAt
         }

@@ -55,7 +55,8 @@ class ChatService {
             requestId,
             organizationId: organization._id,
             organizationName: organization.name,
-            domain
+            matchedDomain: domain,
+            allDomains: organization.domains
         });
         // Handle token logic and get conversation
         const { conversationId, conversationToken, isNewConversation } = await this.handleConversationToken(token, requestId, organization);
