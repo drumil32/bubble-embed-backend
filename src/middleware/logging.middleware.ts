@@ -20,7 +20,7 @@ export const requestLoggingMiddleware = (req: Request, res: Response, next: Next
 
   // Extract domain from host header
   const getDomain = (req: Request): string => {
-    const host = req.get('Host');
+    const host = req.get('X-Forwarded-Host') || req.get('Host');
     if (!host) return 'unknown';
     
     // Remove port if present
