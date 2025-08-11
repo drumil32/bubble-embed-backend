@@ -20,24 +20,14 @@ export const requestLoggingMiddleware = (req: Request, res: Response, next: Next
 
   // Extract domain from host header
   const getDomain = (req: Request): string => {
-    const host = req.get('X-Forwarded-Host') || req.get('Host');
-    logger.info(req.get('X-Forwarded-Host'));
-    logger.info(req.get('Host'));
-    logger.info(req.headers.origin);
-    if (!host) return 'unknown';
-    
-    // Remove port if present
-    const hostWithoutPort = host.split(':')[0];
-    
-    // Split by dots and take appropriate parts
-    const parts = hostWithoutPort.split('.');
-    
-    if (parts.length <= 2) {
-      // localhost or abc.com
-      return hostWithoutPort;
-    } else {
-      // def.ghi.com -> def.ghi
-      return parts.slice(0, -1).join('.');
+    const origin = req.get('Origin');
+    if (!origin) return 'unknown';
+
+    try {
+      const url = new URL(origin);
+      return url.hostname; // keeps full domain including subdomain
+    } catch {
+      return 'unknown';
     }
   };
 
