@@ -7,7 +7,7 @@ import { logger } from '../config/logger';
 
 export interface CreateOrganizationData {
   name: string;
-  domain: string;
+  domains: string[];
   aiProviderLink: string;
   modelName: string;
   apiKey: string;
@@ -47,11 +47,11 @@ export class OrganizationService {
   }
 
   static async createOrganization(data: CreateOrganizationData): Promise<IOrganization> {
-    // Check if organization with same name or domain already exists
+    // Check if organization with same name or any of the domains already exists
     const existingOrg = await Organization.findOne({
       $or: [
         { name: data.name },
-        { domain: data.domain }
+        { domains: { $in: data.domains } }
       ]
     });
 
@@ -59,8 +59,9 @@ export class OrganizationService {
       if (existingOrg.name === data.name) {
         throw Boom.conflict('Organization with this name already exists');
       }
-      if (existingOrg.domain === data.domain) {
-        throw Boom.conflict('Organization with this domain already exists');
+      const conflictingDomain = data.domains.find(domain => existingOrg.domains.includes(domain));
+      if (conflictingDomain) {
+        throw Boom.conflict(`Organization with domain '${conflictingDomain}' already exists`);
       }
     }
 
@@ -78,7 +79,7 @@ export class OrganizationService {
     logger.info('Organization created successfully', {
       organizationId: organization._id,
       name: organization.name,
-      domain: organization.domain,
+      domains: organization.domains,
       accessKey: organization.accessKey
     });
 
@@ -86,7 +87,7 @@ export class OrganizationService {
   }
 
   static async getOrganizationByDomain(domain: string): Promise<IOrganization | null> {
-    return await Organization.findOne({ domain });
+    return await Organization.findOne({ domains: { $in: [domain] } });
   }
 
   static async getOrganizationByName(name: string): Promise<IOrganization | null> {

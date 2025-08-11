@@ -35,7 +35,8 @@ export class ChatService {
       requestId,
       organizationId: organization._id,
       organizationName: organization.name,
-      domain
+      matchedDomain: domain,
+      allDomains: organization.domains
     });
 
     // Handle token logic and get conversation
