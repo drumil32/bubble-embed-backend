@@ -5,7 +5,7 @@ export interface IConversationHistory extends mongoose.Document {
   conversationId: string;
   organizationId: mongoose.Types.ObjectId;
   organizationName: string;
-  domain: string;
+  domains: string[];
   messages: Message[];
   startedAt: Date;
   endedAt: Date;
@@ -35,11 +35,10 @@ const ConversationHistorySchema: Schema = new Schema({
     type: String,
     required: true
   },
-  domain: {
+  domains: [{
     type: String,
-    required: true,
-    index: true
-  },
+    required: true
+  }],
   messages: [{
     role: {
       type: String,
@@ -101,7 +100,7 @@ const ConversationHistorySchema: Schema = new Schema({
 
 // Indexes for efficient querying
 ConversationHistorySchema.index({ organizationId: 1, createdAt: -1 });
-ConversationHistorySchema.index({ domain: 1, createdAt: -1 });
+ConversationHistorySchema.index({ domains: 1, createdAt: -1 });
 ConversationHistorySchema.index({ startedAt: -1 });
 
 export const ConversationHistory = mongoose.model<IConversationHistory>('ConversationHistory', ConversationHistorySchema);

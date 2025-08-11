@@ -8,13 +8,12 @@ const OrganizationSchema: Schema = new Schema({
     unique: true,
     trim: true
   },
-  domain: {
+  domains: [{
     type: String,
     required: true,
-    unique: true,
     trim: true,
     lowercase: true
-  },
+  }],
   aiProviderLink: {
     type: String,
     required: true,
