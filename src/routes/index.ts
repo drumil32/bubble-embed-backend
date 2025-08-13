@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import * as Boom from '@hapi/boom';
 import { organizationRoutes } from './organization.routes';
 import { chatRoutes } from './chat.routes';
+import { leadRoutes } from './lead.routes';
 
 export const routes = Router();
 
@@ -10,6 +11,9 @@ routes.use('/organization', organizationRoutes);
 
 // Chat routes
 routes.use('/', chatRoutes);
+
+// Lead routes
+routes.use('/', leadRoutes);
 
 // Health check endpoint
 routes.get('/health', (req: Request, res: Response) => {

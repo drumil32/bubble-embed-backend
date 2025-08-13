@@ -3,6 +3,7 @@ import * as Boom from '@hapi/boom';
 import { TokenService } from './token.service';
 import { ConversationService, Conversation } from './conversation.service';
 import { OrganizationService } from './organization.service';
+import { LeadService } from './lead.service';
 import { IOrganization } from '../types/organization';
 import { logger } from '../config/logger';
 
@@ -19,6 +20,7 @@ export interface ChatResponse {
   conversationId: string;
   messageCount: number;
   isNewConversation: boolean;
+  needsUserInfo: boolean;
 }
 
 export class ChatService {
@@ -52,11 +54,15 @@ export class ChatService {
     // Store AI response in Redis
     const finalConversation = await ConversationService.addAssistantMessage(conversationId, aiResponse);
 
+    // Check if user info has been collected for this conversation
+    const needsUserInfo = !(await LeadService.hasUserInfoBeenCollected(conversationId));
+
     logger.info('Chat exchange completed', {
       requestId,
       conversationId,
       messageCount: finalConversation.messages.length,
-      isNewConversation
+      isNewConversation,
+      needsUserInfo
     });
 
     return {
@@ -64,7 +70,8 @@ export class ChatService {
       token: conversationToken,
       conversationId,
       messageCount: finalConversation.messages.length,
-      isNewConversation
+      isNewConversation,
+      needsUserInfo
     };
   }
 
