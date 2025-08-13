@@ -1,9 +1,11 @@
-import pdf from 'pdf-parse';
 import * as Boom from '@hapi/boom';
+import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
+import pdf from 'pdf-parse';
+import { logger } from '../config/logger';
 import { Organization } from '../models/Organization';
 import { IOrganization } from '../types/organization';
-import { logger } from '../config/logger';
+import { TokenService } from './token.service';
 
 export interface CreateOrganizationData {
   name: string;
@@ -13,6 +15,8 @@ export interface CreateOrganizationData {
   apiKey: string;
   organizationInformation: string;
   organizationSummary: string;
+  email: string;
+  password: string;
   accessKey?: string;
 }
 
@@ -65,11 +69,16 @@ export class OrganizationService {
       }
     }
 
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+
     // Generate unique access key
     const accessKey = await this.generateUniqueAccessKey();
 
     const organizationData = {
       ...data,
+      password: hashedPassword,
       accessKey
     };
 
@@ -80,6 +89,7 @@ export class OrganizationService {
       organizationId: organization._id,
       name: organization.name,
       domains: organization.domains,
+      email: organization.email,
       accessKey: organization.accessKey
     });
 
@@ -96,5 +106,31 @@ export class OrganizationService {
 
   static async getOrganizationById(id: string): Promise<IOrganization | null> {
     return await Organization.findById(id);
+  }
+
+  static async authenticateOrganization(email: string, password: string): Promise<{ token: string; organization: { name: string; id: string } } | null> {
+    const organization = await Organization.findOne({ email });
+    if (!organization) {
+      return null;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, organization.password);
+    if (!isPasswordValid) {
+      return null;
+    }
+
+    // Since email is unique, there's only one organization per email
+    const orgData = { 
+      name: organization.name, 
+      id: (organization._id as any).toString() 
+    };
+
+    // Generate JWT token using TokenService
+    const token = TokenService.generateAuthToken({
+      email: organization.email,
+      organizationId: orgData.id
+    });
+
+    return { token, organization: orgData };
   }
 }

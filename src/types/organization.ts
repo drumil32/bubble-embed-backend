@@ -8,6 +8,8 @@ export interface IOrganization extends Document {
   apiKey: string;
   organizationInformation: string;
   organizationSummary: string;
+  email: string;
+  password: string;
   accessKey?: string;
   createdAt?: Date;
 }
